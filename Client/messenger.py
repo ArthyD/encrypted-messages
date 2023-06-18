@@ -5,9 +5,8 @@ import json
 
 
 class MessageSender:
-    def __init__(self,id):
-        self.cryptor = Cryptor('','','')
-        self.cryptor.load_keys(os.getcwd())
+    def __init__(self,id,cryptor):
+        self.cryptor = cryptor
         self.id = id
         self.url = os.getenv('SERVER_URL')
 
@@ -42,3 +41,22 @@ class MessageSender:
             return response.text
         except:
             print("Could not send message")
+
+class MessageReceiver:
+    def __init__(self,id,cryptor):
+        self.cryptor = cryptor
+        self.id = id
+        self.url = os.getenv('SERVER_URL')
+
+    def get_messages(self):
+        response = []
+        try:
+            messages = requests.get(self.url+f'/get_my_messages/{self.id}').text
+            messages = json.loads(messages)
+            for message in messages:
+                message["message"] = self.cryptor.decrypt_message(message["message"].encode())
+                response.append(message)
+
+        except:
+            print("Could not get messages")
+        return response

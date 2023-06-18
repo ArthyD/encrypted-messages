@@ -68,7 +68,6 @@ def get_list_messages(id):
         messages = Message.query.filter_by(id_receiver = id)
         for message in messages:
             if(not message.delivered):
-                print("here")
                 data_message = {}
                 data_message["sender_id"]= message.id_sender
                 data_message["message"]=message.message

@@ -19,7 +19,7 @@ class Test_sender:
         response = requests.post(self.url+f'/create_account',data = data)
         response = json.loads(response.text)
         self.id = response["id"]
-        self.sender = MessageSender(self.id)
+        self.sender = MessageSender(self.id,self.cryptor)
 
     def test1(self):
         print(f'[Tester] Test 1/{number_test} : Send a message')
@@ -56,7 +56,7 @@ class Test_sender:
             print("[!!] Test 2 ko")
 
     def test3(self):
-        print(f'[Tester] Test 3/{number_test} Send a signature')
+        print(f'[Tester] Test 3/{number_test} : Send a signature')
         try:
             message = b'Signature'
             response = self.sender.send_signature(self.id_receiver,message)
@@ -67,7 +67,7 @@ class Test_sender:
             print("[!!] Test 3 ko")
 
     def test4(self):
-        print(f'[Tester] Test 4/{number_test} Verify a signature')
+        print(f'[Tester] Test 4/{number_test} : Verify a signature')
         try:
             message = b'Signature'
             response = requests.get(self.url+f'/get_message/{self.id_message}')
