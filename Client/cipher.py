@@ -62,7 +62,8 @@ class Cryptor:
     def sign_message(self, plaintext):
         h = SHA256.new(plaintext)
         signature = pkcs1_15.new(RSA.importKey(self.private_key)).sign(h)
-        return signature
+        encrypted = base64.encodebytes(signature)
+        return encrypted
     
     def decrypt_message(self, cipher):
         encrypted_bytes = BytesIO(base64.decodebytes(cipher))
@@ -84,7 +85,9 @@ class Cryptor:
     def decrypt_signature(self, signature, plaintext):
         h = SHA256.new(plaintext)
         try:
-            pkcs1_15.new(RSA.importKey(self.other_pub_key)).verify(h, signature)
+            encrypted_bytes = BytesIO(base64.decodebytes(signature))
+            ciphertext = encrypted_bytes.read()
+            pkcs1_15.new(RSA.importKey(self.other_pub_key)).verify(h, ciphertext)
             print("[*] Signature ok")
             return True
         except ValueError:
