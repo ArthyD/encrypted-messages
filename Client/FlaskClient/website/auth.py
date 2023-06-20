@@ -1,7 +1,7 @@
 from flask import Blueprint,render_template, request, flash, redirect, url_for
 from .models import Owner
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, current_user
+from flask_login import login_user, current_user, login_required, logout_user
 import random, string
 from . import db
 
@@ -25,8 +25,14 @@ def login():
             return redirect(url_for('auth.register'))
     return render_template("login.html", user=current_user)
 
+@auth.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('auth.login'))
+
 @auth.route('/register', methods=['GET', 'POST'])
-def regsiter():
+def register():
     if request.method == 'POST':
         name = request.form.get('name')
         password1 = request.form.get('password1')
@@ -38,7 +44,7 @@ def regsiter():
             flash("Passwords do not match", category='error')
         else:
             token = randomword(100)
-            new_user = Owner(name=name, password=generate_password_hash(password1, method='sha256'), token=token)
+            new_user = Owner(name=name, hash_password=generate_password_hash(password1, method='sha256'), token=token)
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user)
