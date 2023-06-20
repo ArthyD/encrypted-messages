@@ -8,14 +8,15 @@ import base64
 import zlib
 
 class Cryptor:
-    def __init__(self,public_key,private_key,other_pub_key):
+    def __init__(self,public_key,private_key,other_pub_key, passphrase):
         self.public_key = public_key
         self.private_key = private_key
         self.other_pub_key = other_pub_key
+        self.passphrase = passphrase
 
     def generate_keys(self):
         new_key = RSA.generate(2048)
-        self.private_key = new_key.exportKey()
+        self.private_key = new_key.exportKey(passphrase=self.passphrase)
         self.public_key = new_key.publickey().exportKey()
 
     def save_priv_key(self,path):
@@ -27,17 +28,17 @@ class Cryptor:
             f.write(self.public_key)
 
     def load_keys(self, path):
-        with open(path+'/key.pri') as f:
-            self.private_key = f.read()
-        with open(path+'/key.pub') as f:
-            self.public_key = f.read()
+        with open(path+'/key.pri','r') as f:
+            self.private_key = RSA.import_key(f.read(), passphrase=self.passphrase).exportKey(passphrase=self.passphrase)
+        with open(path+'/key.pub','r') as f:
+            self.public_key = RSA.import_key(f.read()).exportKey()
 
     def set_other_pub_key(self,other_pub_key):
         self.other_pub_key = other_pub_key
 
     def get_rsa_cipher(self,keytype):
         if keytype == 'private':
-            rsakey = RSA.importKey(self.private_key)
+            rsakey = RSA.importKey(self.private_key, passphrase=self.passphrase)
         elif keytype == 'public':
             rsakey = RSA.importKey(self.public_key)
         elif keytype == 'other':
@@ -61,7 +62,7 @@ class Cryptor:
     
     def sign_message(self, plaintext):
         h = SHA256.new(plaintext)
-        signature = pkcs1_15.new(RSA.importKey(self.private_key)).sign(h)
+        signature = pkcs1_15.new(RSA.importKey(self.private_key, passphrase=self.passphrase)).sign(h)
         encrypted = base64.encodebytes(signature)
         return encrypted
     

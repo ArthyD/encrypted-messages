@@ -44,7 +44,7 @@ def register():
             flash("Passwords do not match", category='error')
         else:
             token = randomword(100)
-            new_user = Owner(name=name, hash_password=generate_password_hash(password1, method='sha256'), token=token)
+            new_user = Owner(name=name, hash_password=generate_password_hash(password1, method='scrypt'), token=token)
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user)
