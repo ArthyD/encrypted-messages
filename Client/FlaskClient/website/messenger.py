@@ -1,6 +1,5 @@
 import requests
 import os
-from .cipher import Cryptor
 import json
 
 

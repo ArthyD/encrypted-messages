@@ -1,5 +1,5 @@
-from Client.messenger import MessageSender, MessageReceiver
-from Client.cipher import Cryptor
+from Client.FlaskClient.website.messenger import MessageSender, MessageReceiver
+from Client.FlaskClient.website.cipher import Cryptor
 import requests
 import os
 import json

@@ -1,5 +1,5 @@
 
-from Client.cipher import Cryptor
+from Client.FlaskClient.website.cipher import Cryptor
 
 number_test = 4
 class Test_Cipher:

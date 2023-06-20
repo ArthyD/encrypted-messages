@@ -1,10 +1,17 @@
 from . import db
 from sqlalchemy.sql import func
 
-class User(db.Model):
+class Owner(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
-    pub_key= db.Column(db.Text())
+    hash_password = db.Column(db.String(150))
+    token = db.Column(db.Text)
+
+class Contact(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120))
+    pub_key= db.Column(db.Text)
+
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
