@@ -4,6 +4,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, current_user, login_required, logout_user
 import random, string
 from . import db
+from .cipher import Cryptor
+import json
+import requests
+import os
 
 auth = Blueprint('auth', __name__)
 
@@ -44,7 +48,12 @@ def register():
             flash("Passwords do not match", category='error')
         else:
             token = randomword(100)
-            new_user = Owner(name=name, hash_password=generate_password_hash(password1, method='scrypt'), token=token)
+            cryptor = Cryptor('','','',password1)
+            cryptor.generate_keys()
+            cryptor.save_priv_key('.')
+            cryptor.save_pub_key('.')  
+            id = create_account(cryptor,name,token)
+            new_user = Owner(name=name, hash_password=generate_password_hash(password1, method='scrypt'), token=token, message_id=id)
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user)
@@ -52,7 +61,16 @@ def register():
             return redirect(url_for('views.home'))
     return render_template("register.html", user=current_user)
 
-
+def create_account(cryptor,name,token):
+    url = os.getenv('SERVER_URL')
+    data = {}
+    data["public_key"]=cryptor.public_key.decode()
+    data["username"]=name
+    data = json.dumps(data)
+    response = requests.post(url+f'/create_account',data = data)
+    response = json.loads(response.text)
+    return response["id"]
+            
 def randomword(length):
    letters = string.ascii_lowercase
    return ''.join(random.choice(letters) for i in range(length))

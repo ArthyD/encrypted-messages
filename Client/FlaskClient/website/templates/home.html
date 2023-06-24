@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Message Sender{% endblock %}
+
+{% block content%}
+<h3>Hello, {{user.name}} (id: {{user.message_id}})</h3>
+
+<h2>Add a contact :</h2>
+<form method="POST">
+    <div class="md-form">
+        <form method="POST" class="col s12">
+            <div class="input-field col s12">
+                <label for="nom">Contact name :</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    placeholder=""
+                />
+            </div>
+
+            <div class="input-field col s12">
+                <label for="id">Contact id :</label>
+                <input
+                    type="number"
+                    class="form-control"
+                    id="id"
+                    name="id"
+                    placeholder=""
+                />
+            </div>
+    <button type="submit"
+            name="add_contact"
+            value="add_contact"
+            class="btn btn-primary">
+        Add contact
+    </button>
+</form>
+
+<h2>Your contacts :</h2>
+{% for contact in contact_list %}
+    <a href="{{url_for('views.get_messages', contact_id=contact.message_id)}}">{{contact.name}} : {{contact.message_id}}  
+        <p>Public key : {{contact.pub_key}}</p>
+    </a>
+{% endfor %}
+{% endblock %}
