@@ -53,7 +53,7 @@ class MessageReceiver:
             messages = requests.get(self.url+f'/get_my_messages/{self.id}').text
             messages = json.loads(messages)
             for message in messages:
-                message["message"] = self.cryptor.decrypt_message(message["message"].encode())
+                message["message"] = message["message"]
                 response.append(message)
 
         except:

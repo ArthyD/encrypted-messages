@@ -30,7 +30,12 @@
     </button>
 </form>
 {% for message in messages %}
-    <p>{{message.date}} : {{message.message}}</p>
+    {% if message.sender=='me' %}
+        <p>Me {{message.date}} : {{message.message}}</p>
+    {% else %}
+        <p>{{contact.name}} {{message.date}} : {{message.message}}</p>
+    {% endif %}
+
 {% endfor %}
 <form method="POST" class="col s12">
     <input

@@ -43,14 +43,23 @@ def get_messages(contact_id):
             receiver = MessageReceiver(current_user.message_id,cryptor)
             messages = receiver.get_messages()
             print(messages)
-        elif 'send_message' in request.form:
-            message = request.form.get('message').encode()
-            cryptor.set_other_pub_key(contact.pub_key)
-            sender = MessageSender(current_user.message_id, cryptor)
-            sender.send_message(contact.message_id,message)
-            new_message = Message(id_receiver=contact.message_id,id_sender=current_user.message_id,message=message.decode(),delivered=False)
-            db.session.add(new_message)
+            for message in messages:
+                new_message = Message(id_receiver=current_user.message_id, id_sender=contact.message_id, message=message["message"], delivered = True)
+                db.session.add(new_message)
             db.session.commit()
+        elif 'send_message' in request.form:
+            try:
+                cryptor.load_keys(f'./{current_user.name}')
+                message = request.form.get('message').encode()
+                cryptor.set_other_pub_key(contact.pub_key)
+                sender = MessageSender(current_user.message_id, cryptor)
+                sender.send_message(contact.message_id,message)
+                new_message = Message(id_receiver=contact.message_id,id_sender=current_user.message_id,message=cryptor.own_encrypt(message).decode(),delivered=False)
+                db.session.add(new_message)
+                db.session.commit()
+            except:
+                flash("Unlock key by giving password", category='error')
+            
         elif 'unlock_key' in request.form:
             password = request.form.get('password')
             if check_password_hash(current_user.hash_password, password):
@@ -64,16 +73,25 @@ def get_messages(contact_id):
     try:
         cryptor.load_keys(f'./{current_user.name}')
     except:
-        flash("Unlock key by giving password then reload page", category='error')
+        flash("Unlock key by giving password", category='error')
     for message in list_messages:
         if(message.id_sender == current_user.message_id):
             mess = {}
+            mess["sender"] = "me"
             try:
                 mess["message"]=cryptor.decrypt_message(message.message.encode()).decode()
             except:
                 mess["message"]=message.message
             mess["date"]=message.date
             messages.append(mess)
-
+        elif(message.id_sender == contact.message_id):
+            mess = {}
+            mess["sender"] = "contact"
+            try:
+                mess["message"]=cryptor.decrypt_message(message.message.encode()).decode()
+            except:
+                mess["message"]=message.message
+            mess["date"]=message.date
+            messages.append(mess)
 
     return render_template("messages.html", user=current_user, contact=contact, messages=messages)

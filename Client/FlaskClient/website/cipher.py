@@ -60,6 +60,19 @@ class Cryptor:
         encrypted = base64.encodebytes(msg_payload)
         return encrypted
     
+    def own_encrypt(self, plaintext):
+        compressed_text = zlib.compress(plaintext)
+        session_key = get_random_bytes(16)
+        cipher_aes = AES.new(session_key, AES.MODE_EAX)
+        ciphertext, tag = cipher_aes.encrypt_and_digest(compressed_text)
+
+        cipher_rsa, _ = self.get_rsa_cipher('public')
+        encrypted_session_key = cipher_rsa.encrypt(session_key)
+
+        msg_payload = encrypted_session_key +cipher_aes.nonce + tag + ciphertext
+        encrypted = base64.encodebytes(msg_payload)
+        return encrypted
+    
     def sign_message(self, plaintext):
         h = SHA256.new(plaintext)
         signature = pkcs1_15.new(RSA.importKey(self.private_key, passphrase=self.passphrase)).sign(h)
@@ -94,7 +107,7 @@ class Cryptor:
         except ValueError:
             print("[!!] Signature not valid")
             return False
-
+        
         
 
 
