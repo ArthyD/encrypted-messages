@@ -2,9 +2,11 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 import os
+from .cipher import Cryptor
 
 db = SQLAlchemy()
 DB_NAME= 'database.db'
+cryptor = Cryptor('','','','')
 
 def create_app():
     app = Flask(__name__)
@@ -16,6 +18,10 @@ def create_app():
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
     create_database(app)
+    try:
+        cryptor.load_keys('.')
+    except:
+        print("No keys were present")
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'

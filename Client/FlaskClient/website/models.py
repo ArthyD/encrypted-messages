@@ -18,7 +18,8 @@ class Contact(db.Model):
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    id_sender = db.Column(db.Integer, db.ForeignKey('contact.id'))
+    id_receiver = db.Column(db.Integer)
+    id_sender = db.Column(db.Integer)
     date = db.Column(db.DateTime(timezone=True),default=func.now())
     delivered = db.Column(db.Boolean)
     message = db.Column(db.Text)

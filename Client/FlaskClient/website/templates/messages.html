@@ -4,5 +4,48 @@
 
 {% block content%}
 <h2>Messages with : {{contact.name}} (id = {{contact.message_id}})</h2>
+<form method="POST" class="col s12">
+    <button type="submit"
+        name="load"
+        value="load"
+            class="btn btn-primary">
+        Load messages
+    </button>
+</form>
+<form method="POST" class="col s12">
+    <label for="password">Password :</label>
+    <input
+        type="password"
+        class="form-control"
+        id="password"
+        name="password"
+        placeholder="*****"
+    />
 
+    <button type="submit"
+        name="unlock_key"
+        value="unlock_key"
+            class="btn btn-primary">
+        Unlock key
+    </button>
+</form>
+{% for message in messages %}
+    <p>{{message.date}} : {{message.message}}</p>
+{% endfor %}
+<form method="POST" class="col s12">
+    <input
+                type="text"
+                class="form-control"
+                id="message"
+                name="message"
+                placeholder="Type here"
+            />
+
+    <button type="submit"
+        name="send_message"
+        value="send_message"
+            class="btn btn-primary">
+        Send >
+    </button>
+</form>
 {% endblock %}

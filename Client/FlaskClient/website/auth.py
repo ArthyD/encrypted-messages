@@ -3,11 +3,11 @@ from .models import Owner
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, current_user, login_required, logout_user
 import random, string
-from . import db
-from .cipher import Cryptor
+from . import db, cryptor
 import json
 import requests
 import os
+
 
 auth = Blueprint('auth', __name__)
 
@@ -20,6 +20,8 @@ def login():
         if user:
             if check_password_hash(user.hash_password, password):
                 flash('Logged in successfully!', category = 'success')
+                cryptor.passphrase=password
+                cryptor.load_keys(f'./{user.name}')
                 login_user(user)
                 return redirect(url_for('views.home'))
             else:
@@ -48,10 +50,11 @@ def register():
             flash("Passwords do not match", category='error')
         else:
             token = randomword(100)
-            cryptor = Cryptor('','','',password1)
+            cryptor.passphrase=password1
             cryptor.generate_keys()
-            cryptor.save_priv_key('.')
-            cryptor.save_pub_key('.')  
+            os.makedirs(f'./{name}')
+            cryptor.save_priv_key(f'./{name}')
+            cryptor.save_pub_key(f'./{name}')  
             id = create_account(cryptor,name,token)
             new_user = Owner(name=name, hash_password=generate_password_hash(password1, method='scrypt'), token=token, message_id=id)
             db.session.add(new_user)

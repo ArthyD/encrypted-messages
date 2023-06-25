@@ -1,12 +1,14 @@
 from flask import Blueprint, jsonify, request, render_template, flash
-from . import db
+from . import db, cryptor
 from .models import Owner,Message,Contact
 from datetime import datetime
 import json
+from werkzeug.security import check_password_hash
 from flask_login import login_required, current_user
 from .messenger import MessageReceiver,MessageSender
 import os
 import requests
+from sqlalchemy import or_,and_
 
 views = Blueprint('views', __name__)
 
@@ -36,4 +38,42 @@ def home():
 @login_required
 def get_messages(contact_id):
     contact = Contact.query.filter_by(message_id=contact_id).first()
-    return render_template("messages.html", user=current_user, contact=contact)
+    if request.method == 'POST':
+        if 'load' in request.form:
+            receiver = MessageReceiver(current_user.message_id,cryptor)
+            messages = receiver.get_messages()
+            print(messages)
+        elif 'send_message' in request.form:
+            message = request.form.get('message').encode()
+            cryptor.set_other_pub_key(contact.pub_key)
+            sender = MessageSender(current_user.message_id, cryptor)
+            sender.send_message(contact.message_id,message)
+            new_message = Message(id_receiver=contact.message_id,id_sender=current_user.message_id,message=message.decode(),delivered=False)
+            db.session.add(new_message)
+            db.session.commit()
+        elif 'unlock_key' in request.form:
+            password = request.form.get('password')
+            if check_password_hash(current_user.hash_password, password):
+                cryptor.passphrase=password
+                flash('Key unlocked', category="success")
+            else:
+                flash('Wrong password', category="error")
+    list_messages = db.session.query(Message).filter(or_(and_(Message.id_sender==current_user.message_id, Message.id_receiver==contact.message_id),and_(Message.id_sender==contact.message_id, Message.id_receiver==current_user.message_id)))
+    messages = []
+    
+    try:
+        cryptor.load_keys(f'./{current_user.name}')
+    except:
+        flash("Unlock key by giving password then reload page", category='error')
+    for message in list_messages:
+        if(message.id_sender == current_user.message_id):
+            mess = {}
+            try:
+                mess["message"]=cryptor.decrypt_message(message.message.encode()).decode()
+            except:
+                mess["message"]=message.message
+            mess["date"]=message.date
+            messages.append(mess)
+
+
+    return render_template("messages.html", user=current_user, contact=contact, messages=messages)
