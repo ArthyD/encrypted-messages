@@ -6,8 +6,12 @@ class Owner(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
     hash_password = db.Column(db.String(150))
-    token = db.Column(db.Text)
     message_id = db.Column(db.Integer)
+    user_provided_token = db.Column(db.String(150))
+    server_provided_token = db.Column(db.String(150))
+    hash_server_token = db.Column(db.String(150))
+    pub_key = db.Column(db.Text)
+    priv_key = db.Column(db.Text)
 
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)

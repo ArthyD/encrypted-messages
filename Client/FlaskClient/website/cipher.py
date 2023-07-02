@@ -19,6 +19,12 @@ class Cryptor:
         self.private_key = new_key.exportKey(passphrase=self.passphrase)
         self.public_key = new_key.publickey().exportKey()
 
+    def set_priv_key(self, priv_key):
+        self.private_key = priv_key
+
+    def set_pub_key(self, pub_key):
+        self.public_key = pub_key
+
     def save_priv_key(self,path):
         with open(path+'/key.pri','wb') as f:
             f.write(self.private_key)

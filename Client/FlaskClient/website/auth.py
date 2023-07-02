@@ -7,6 +7,7 @@ from . import db, cryptor
 import json
 import requests
 import os
+import secrets
 
 
 auth = Blueprint('auth', __name__)
@@ -20,8 +21,9 @@ def login():
         if user:
             if check_password_hash(user.hash_password, password):
                 flash('Logged in successfully!', category = 'success')
-                cryptor.passphrase=password
-                cryptor.load_keys(f'./{user.name}')
+                cryptor.passphrase = password
+                cryptor.set_priv_key(user.priv_key)
+                cryptor.set_pub_key(user.pub_key)
                 login_user(user)
                 return redirect(url_for('views.home'))
             else:
@@ -49,14 +51,20 @@ def register():
         elif password1 != password2:
             flash("Passwords do not match", category='error')
         else:
-            token = randomword(100)
             cryptor.passphrase=password1
             cryptor.generate_keys()
             os.makedirs(f'./{name}')
             cryptor.save_priv_key(f'./{name}')
             cryptor.save_pub_key(f'./{name}')  
-            id = create_account(cryptor,name,token)
-            new_user = Owner(name=name, hash_password=generate_password_hash(password1, method='scrypt'), token=token, message_id=id)
+            response = create_account(cryptor,name)
+            new_user = Owner(name=name, 
+                             hash_password=generate_password_hash(password1, method='scrypt'),  
+                             message_id=response["id"],
+                             user_provided_token= response["user_provided_token"],
+                             server_provided_token = response["server_provided_token"],
+                             hash_server_token = generate_password_hash(response["server_token"],"scrypt"),
+                             pub_key=cryptor.public_key,
+                             priv_key= cryptor.private_key)
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user)
@@ -64,16 +72,16 @@ def register():
             return redirect(url_for('views.home'))
     return render_template("register.html", user=current_user)
 
-def create_account(cryptor,name,token):
+def create_account(cryptor,name):
     url = os.getenv('SERVER_URL')
     data = {}
     data["public_key"]=cryptor.public_key.decode()
     data["username"]=name
+    user_provided_token=secrets.token_hex(32)
+    data["user_provided_token"]=user_provided_token
     data = json.dumps(data)
     response = requests.post(url+f'/create_account',data = data)
     response = json.loads(response.text)
-    return response["id"]
+    response["user_provided_token"]= user_provided_token
+    return response
             
-def randomword(length):
-   letters = string.ascii_lowercase
-   return ''.join(random.choice(letters) for i in range(length))

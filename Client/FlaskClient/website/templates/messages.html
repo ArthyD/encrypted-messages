@@ -12,23 +12,7 @@
         Load messages
     </button>
 </form>
-<form method="POST" class="col s12">
-    <label for="password">Password :</label>
-    <input
-        type="password"
-        class="form-control"
-        id="password"
-        name="password"
-        placeholder="*****"
-    />
 
-    <button type="submit"
-        name="unlock_key"
-        value="unlock_key"
-            class="btn btn-primary">
-        Unlock key
-    </button>
-</form>
 {% for message in messages %}
     {% if message.sender=='me' %}
         <p>Me {{message.date}} : {{message.message}}</p>

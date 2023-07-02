@@ -18,7 +18,8 @@ def create_user():
         server_provided_token = secrets.token_hex(32)
         server_token = secrets.token_hex(32)
         
-        new_user = User(name=data['username'], pub_key=data['public_key'], 
+        new_user = User(name=data['username'], 
+                        pub_key=data['public_key'], 
                         hash_server_provided_token = generate_password_hash(server_provided_token, method='scrypt'),
                         hash_client_provided_token = generate_password_hash(data["user_provided_token"], method='scrypt'),
                         server_token = server_token)
