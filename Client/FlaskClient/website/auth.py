@@ -53,9 +53,6 @@ def register():
         else:
             cryptor.passphrase=password1
             cryptor.generate_keys()
-            os.makedirs(f'./{name}')
-            cryptor.save_priv_key(f'./{name}')
-            cryptor.save_pub_key(f'./{name}')  
             response = create_account(cryptor,name)
             new_user = Owner(name=name, 
                              hash_password=generate_password_hash(password1, method='scrypt'),  

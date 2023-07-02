@@ -24,13 +24,16 @@ def home():
             response = json.loads(response.text)
             if response["id"] == int(id):
                 pub_key = response["pub_key"]
-                new_contact = Contact(name = name, pub_key=pub_key, message_id = id)
+                new_contact = Contact(name = name, 
+                                      id_owner = current_user.id, 
+                                      pub_key=pub_key, 
+                                      message_id = id)
                 flash("Contact added", category='success')
                 db.session.add(new_contact)
                 db.session.commit()
             else:
                 flash("Contact not known by server", category = 'error')
-    contact_list = Contact.query.all()
+    contact_list = Contact.query.filter_by(id_owner = current_user.id)
 
     return render_template("home.html", user=current_user, contact_list=contact_list)
 

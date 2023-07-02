@@ -15,6 +15,7 @@ class Owner(db.Model, UserMixin):
 
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    id_owner = db.Column(db.Integer,db.ForeignKey(('owner.id')))
     name = db.Column(db.String(120))
     pub_key= db.Column(db.Text)
     message_id = db.Column(db.Integer)
