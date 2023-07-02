@@ -72,36 +72,30 @@ def get_messages(contact_id):
                 db.session.commit()
             except:
                 flash("Error when sending", category='error')
-        
+            
     
-    list_messages = db.session.query(Message).filter_by(id_receiver = contact.message_id)
+    list_messages = db.session.query(Message).filter(or_(and_(Message.id_sender==current_user.message_id, Message.id_receiver==contact.message_id),and_(Message.id_sender==contact.message_id, Message.id_receiver==current_user.message_id)))
     messages = []
-    for message in list_messages:    
-        mess = {}
-        mess["sender"] = "me"
-        print(message.message)
-        try:
-            print("here")
-            mess["message"]=cryptor.decrypt_message(message.message.encode()).decode()
-        except:
-            print("there")
-            mess["message"]=message.message
-        mess["date"]=message.date
-        messages.append(mess)
-
-    list_messages = db.session.query(Message).filter_by(id_sender = contact.message_id)
-    for message in list_messages:    
-        mess = {}
-        mess["sender"] = contact.name
-        print(message.message)
-        try:
-            print("here")
-            mess["message"]=cryptor.decrypt_message(message.message.encode()).decode()
-        except:
-            print("there")
-            mess["message"]=message.message
-        mess["date"]=message.date
-        messages.append(mess)
-        
+    for message in list_messages:
+        if(message.id_sender == current_user.message_id):
+            mess = {}
+            mess["sender"] = "me"
+            try:
+                print("here")
+                mess["message"]=cryptor.decrypt_message(message.message.encode()).decode()
+            except:
+                print("there")
+                mess["message"]=message.message
+            mess["date"]=message.date
+            messages.append(mess)
+        elif(message.id_sender == contact.message_id):
+            mess = {}
+            mess["sender"] = "contact"
+            try:
+                mess["message"]=cryptor.decrypt_message(message.message.encode()).decode()
+            except:
+                mess["message"]=message.message
+            mess["date"]=message.date
+            messages.append(mess)
 
     return render_template("messages.html", user=current_user, contact=contact, messages=messages)
