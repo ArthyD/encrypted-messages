@@ -21,12 +21,12 @@
             </div>
 
             <div class="input-field col s12">
-                <label for="id">Contact id :</label>
+                <label for="id">Contact uuid :</label>
                 <input
-                    type="number"
+                    type="text"
                     class="form-control"
-                    id="id"
-                    name="id"
+                    id="uuid"
+                    name="uuid"
                     placeholder=""
                 />
             </div>
@@ -41,7 +41,7 @@
 <h2>Your contacts :</h2>
 {% for contact in contact_list %}
     <a href="{{url_for('views.get_messages', contact_id=contact.message_id)}}">{{contact.name}} : {{contact.message_id}}  
-        <p>Public key : {{contact.pub_key}}</p>
+        <p>UUID : {{contact.uuid_contact}}</p>
     </a>
 {% endfor %}
 {% endblock %}

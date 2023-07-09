@@ -15,27 +15,27 @@ views = Blueprint('views', __name__)
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
+    server = Server.query.filter_by(id = current_user.current_server).first()
     if request.method == 'POST':
         if 'add_contact' in request.form:
-            url = os.getenv('SERVER_URL')
-            id = request.form.get('id')
+            url = server.server_url
+            uuid = request.form.get('uuid')
             name = request.form.get('name')
-            response = requests.get(url+f'/get_user_key/{id}')
+            response = requests.get(url+f'/get_user_key/{uuid}')
             response = json.loads(response.text)
-            if response["id"] == int(id):
+            if response["uuid"] == uuid:
                 pub_key = response["pub_key"]
                 new_contact = Contact(name = name, 
                                       id_owner = current_user.id, 
                                       pub_key=pub_key, 
-                                      message_id = id)
+                                      uuid_contact = uuid,
+                                      server_id = current_user.current_server)
                 flash("Contact added", category='success')
                 db.session.add(new_contact)
                 db.session.commit()
             else:
                 flash("Contact not known by server", category = 'error')
-    contact_list =  []#Contact.query.filter_by(id_owner = current_user.id)
-    server = Server.query.filter_by(id = current_user.current_server).first()
-    print(f"[!!] {server.server_url}")
+    contact_list = Contact.query.filter_by(id_owner = current_user.id, server_id = current_user.current_server)
     relation = isInServer.query.filter_by(server_id = server.id).first()
     return render_template("home.html", user=current_user, contact_list=contact_list, server = server, isInServer = relation)
 

@@ -14,9 +14,6 @@ class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
     pub_key= db.Column(db.Text)
-
-class contactInSevrer(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
     id_owner = db.Column(db.Integer,db.ForeignKey(('owner.id')))
     uuid_contact = db.Column(db.String(150))
     server_id = db.Column(db.Integer, db.ForeignKey(('server.id')))
