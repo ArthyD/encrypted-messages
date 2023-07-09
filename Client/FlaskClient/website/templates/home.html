@@ -3,7 +3,7 @@
 {% block title %}Message Sender{% endblock %}
 
 {% block content%}
-<h3>Hello, {{user.name}} (id: {{user.message_id}})</h3>
+<h3>Hello, {{user.name}} , you are using : {{server.server_url}}, your uuid on it is : {{isInServer.uuid}} </h3>
 
 <h2>Add a contact :</h2>
 <form method="POST">

@@ -26,7 +26,7 @@ class Test_sender:
         self.uuid = response["uuid"]
         self.server_provided_token = response["server_provided_token"]
         self.hash_server_token = generate_password_hash(response["server_token"],"scrypt")
-        self.sender = MessageSender(self.uuid,self.cryptor, self.user_provided_token, self.server_provided_token, self.hash_server_token)
+        self.sender = MessageSender(self.uuid,self.cryptor, self.user_provided_token, self.server_provided_token, self.hash_server_token, self.url)
 
     def test1(self):
         print(f'[Tester] Test 1/{number_test} : Send a message')

@@ -1,5 +1,5 @@
 from flask import Blueprint,render_template, request, flash, redirect, url_for
-from .models import Owner
+from .models import Owner, Server, isInServer
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, current_user, login_required, logout_user
 import random, string
@@ -42,6 +42,12 @@ def logout():
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        url = request.form.get('server')
+        server = Server.query.filter_by(server_url=url).first()
+        if not server:
+            server = Server(server_url = url)
+            db.session.add(server)
+            db.session.commit()
         name = request.form.get('name')
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
@@ -56,13 +62,17 @@ def register():
             response = create_account(cryptor,name)
             new_user = Owner(name=name, 
                              hash_password=generate_password_hash(password1, method='scrypt'),  
-                             message_id=response["id"],
-                             user_provided_token= response["user_provided_token"],
-                             server_provided_token = response["server_provided_token"],
-                             hash_server_token = generate_password_hash(response["server_token"],"scrypt"),
                              pub_key=cryptor.public_key,
-                             priv_key= cryptor.private_key)
+                             priv_key= cryptor.private_key,
+                             current_server = server.id)
+            newInServer = isInServer(id_owner = new_user.id, 
+                                     server_id = server.id,
+                                     user_provided_token= response["user_provided_token"],
+                                     server_provided_token = response["server_provided_token"],
+                                     hash_server_token = generate_password_hash(response["server_token"],"scrypt"),
+                                     uuid = response["uuid"])
             db.session.add(new_user)
+            db.session.add(newInServer)
             db.session.commit()
             login_user(new_user)
             flash("Account created!", category="success")

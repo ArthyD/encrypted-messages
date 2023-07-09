@@ -5,13 +5,13 @@ from werkzeug.security import check_password_hash
 
 
 class MessageSender:
-    def __init__(self,uuid,cryptor, user_provided_token, server_provided_token, hash_server_token):
+    def __init__(self,uuid,cryptor, user_provided_token, server_provided_token, hash_server_token,url):
         self.cryptor = cryptor
         self.uuid = uuid
         self.user_provided_token = user_provided_token
         self.sever_provided_token = server_provided_token
         self.hash_server_token = hash_server_token
-        self.url = os.getenv('SERVER_URL')
+        self.url = url
 
     def send_message(self, uuid_receiver,message):
         try:
@@ -65,13 +65,13 @@ class MessageSender:
             print("Could not send message")
 
 class MessageReceiver:
-    def __init__(self,uuid,cryptor, user_provided_token, server_provided_token, hash_server_token):
+    def __init__(self,uuid,cryptor, user_provided_token, server_provided_token, hash_server_token, url):
         self.cryptor = cryptor
         self.uuid = uuid
         self.user_provided_token = user_provided_token
         self.sever_provided_token = server_provided_token
         self.hash_server_token = hash_server_token
-        self.url = os.getenv('SERVER_URL')
+        self.url = url
 
     def get_messages(self):
         message_received = []

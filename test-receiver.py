@@ -23,7 +23,7 @@ class TestReceiver:
         self.uuid_receiver = response["uuid"]
         self.server_provided_token = response["server_provided_token"]
         self.hash_server_token = generate_password_hash(response["server_token"],"scrypt")
-        self.receiver = MessageReceiver(self.uuid_receiver,self.cryptor, self.user_provided_token, self.server_provided_token, self.hash_server_token)
+        self.receiver = MessageReceiver(self.uuid_receiver,self.cryptor, self.user_provided_token, self.server_provided_token, self.hash_server_token, self.url)
         
         self.cryptor2 = Cryptor('','','','password')
         self.cryptor2.generate_keys()
@@ -38,7 +38,7 @@ class TestReceiver:
         self.uuid_sender = response["uuid"]
         self.server_provided_token2 = response["server_provided_token"]
         self.hash_server_token2 = generate_password_hash(response["server_token"],"scrypt")
-        self.sender = MessageSender(self.uuid_sender,self.cryptor, self.user_provided_token2, self.server_provided_token2, self.hash_server_token2)
+        self.sender = MessageSender(self.uuid_sender,self.cryptor, self.user_provided_token2, self.server_provided_token2, self.hash_server_token2, self.url)
 
         self.sender.send_message(self.uuid_receiver,b'Test1')
         self.sender.send_message(self.uuid_receiver,b'Test2')

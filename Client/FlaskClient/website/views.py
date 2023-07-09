@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, render_template, flash
 from . import db, cryptor
-from .models import Owner,Message,Contact
+from .models import Owner,Message,Contact, Server, isInServer
 from datetime import datetime
 import json
 from werkzeug.security import check_password_hash
@@ -33,9 +33,11 @@ def home():
                 db.session.commit()
             else:
                 flash("Contact not known by server", category = 'error')
-    contact_list = Contact.query.filter_by(id_owner = current_user.id)
-
-    return render_template("home.html", user=current_user, contact_list=contact_list)
+    contact_list =  []#Contact.query.filter_by(id_owner = current_user.id)
+    server = Server.query.filter_by(id = current_user.current_server).first()
+    print(f"[!!] {server.server_url}")
+    relation = isInServer.query.filter_by(server_id = server.id).first()
+    return render_template("home.html", user=current_user, contact_list=contact_list, server = server, isInServer = relation)
 
 @views.route('/message/<contact_id>', methods=['GET', 'POST'])
 @login_required
