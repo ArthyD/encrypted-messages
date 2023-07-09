@@ -59,7 +59,7 @@ def register():
         else:
             cryptor.passphrase=password1
             cryptor.generate_keys()
-            response = create_account(cryptor,name)
+            response = create_account(cryptor,name,server.server_url)
             new_user = Owner(name=name, 
                              hash_password=generate_password_hash(password1, method='scrypt'),  
                              pub_key=cryptor.public_key,
@@ -79,15 +79,14 @@ def register():
             return redirect(url_for('views.home'))
     return render_template("register.html", user=current_user)
 
-def create_account(cryptor,name):
-    url = os.getenv('SERVER_URL')
+def create_account(cryptor,name,url):
     data = {}
     data["public_key"]=cryptor.public_key.decode()
     data["username"]=name
     user_provided_token=secrets.token_hex(32)
     data["user_provided_token"]=user_provided_token
     data = json.dumps(data)
-    response = requests.post(url+f'/create_account',data = data)
+    response = requests.post(url+'/create_account',data = data)
     response = json.loads(response.text)
     response["user_provided_token"]= user_provided_token
     return response
