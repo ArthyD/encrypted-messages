@@ -40,7 +40,7 @@
 
 <h2>Your contacts :</h2>
 {% for contact in contact_list %}
-    <a href="{{url_for('views.get_messages', contact_id=contact.message_id)}}">{{contact.name}} : {{contact.message_id}}  
+    <a href="{{url_for('views.get_messages', contact_uuid=contact.uuid_contact)}}">{{contact.name}}  
         <p>UUID : {{contact.uuid_contact}}</p>
     </a>
 {% endfor %}

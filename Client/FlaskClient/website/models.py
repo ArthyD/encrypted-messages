@@ -21,8 +21,8 @@ class Contact(db.Model):
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    id_receiver = db.Column(db.Integer)
-    id_sender = db.Column(db.Integer)
+    uuid_receiver = db.Column(db.String(150))
+    uuid_sender = db.Column(db.String(150))
     date = db.Column(db.DateTime(timezone=True),default=func.now())
     message = db.Column(db.Text)
     server_id = db.Column(db.Integer, db.ForeignKey(('server.id')))

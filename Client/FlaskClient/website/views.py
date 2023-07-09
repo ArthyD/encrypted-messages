@@ -39,50 +39,55 @@ def home():
     relation = isInServer.query.filter_by(server_id = server.id).first()
     return render_template("home.html", user=current_user, contact_list=contact_list, server = server, isInServer = relation)
 
-@views.route('/message/<contact_id>', methods=['GET', 'POST'])
+@views.route('/message/<contact_uuid>', methods=['GET', 'POST'])
 @login_required
-def get_messages(contact_id):
-    contact = Contact.query.filter_by(message_id=contact_id).first()
+def get_messages(contact_uuid):
+    contact = Contact.query.filter_by(uuid_contact = contact_uuid).first()
+    server = Server.query.filter_by(id = current_user.current_server).first()
+    relation = isInServer.query.filter_by(server_id = server.id).first()
     if request.method == 'POST':
         if 'load' in request.form:
-            receiver = MessageReceiver(current_user.message_id,
+            receiver = MessageReceiver(relation.uuid,
                                        cryptor,
-                                       current_user.user_provided_token,
-                                       current_user.server_provided_token,
-                                       current_user.hash_server_token)
+                                       relation.user_provided_token,
+                                       relation.server_provided_token,
+                                       relation.hash_server_token,
+                                       server.server_url)
             messages = receiver.get_messages()
             print(messages)
             for message in messages:
-                new_message = Message(id_receiver=current_user.message_id, 
-                                      id_sender=contact.message_id, 
+                new_message = Message(uuid_receiver=relation.uuid, 
+                                      uuid_sender=contact.uuid_contact, 
                                       message=message["message"], 
-                                      delivered = True)
+                                      server_id = server.id)
                 db.session.add(new_message)
             db.session.commit()
         elif 'send_message' in request.form:
             try:
                 message = request.form.get('message').encode()
                 cryptor.set_other_pub_key(contact.pub_key)
-                sender = MessageSender(current_user.message_id, 
+                sender = MessageSender(relation.uuid, 
                                        cryptor,
-                                       current_user.user_provided_token,
-                                       current_user.server_provided_token,
-                                       current_user.hash_server_token)
-                sender.send_message(contact.message_id,message)
-                new_message = Message(id_receiver=contact.message_id,
-                                      id_sender=current_user.message_id,
+                                       relation.user_provided_token,
+                                       relation.server_provided_token,
+                                       relation.hash_server_token,
+                                       server.server_url)
+                sender.send_message(contact.uuid_contact,message)
+                new_message = Message(uuid_receiver=contact.uuid_contact,
+                                      uuid_sender=relation.uuid,
                                       message=cryptor.own_encrypt(message).decode(),
-                                      delivered=False)
+                                      server_id = server.id)
                 db.session.add(new_message)
                 db.session.commit()
-            except:
+            except Exception as e:
+                print(e)
                 flash("Error when sending", category='error')
             
     
-    list_messages = db.session.query(Message).filter(or_(and_(Message.id_sender==current_user.message_id, Message.id_receiver==contact.message_id),and_(Message.id_sender==contact.message_id, Message.id_receiver==current_user.message_id)))
+    list_messages = db.session.query(Message).filter(or_(and_(Message.uuid_sender==relation.uuid, Message.uuid_receiver==contact.uuid_contact),and_(Message.uuid_sender==contact.uuid_contact, Message.uuid_receiver==relation.uuid)))
     messages = []
     for message in list_messages:
-        if(message.id_sender == current_user.message_id):
+        if(message.uuid_sender == relation.uuid):
             mess = {}
             mess["sender"] = "me"
             try:
@@ -93,7 +98,7 @@ def get_messages(contact_id):
                 mess["message"]=message.message
             mess["date"]=message.date
             messages.append(mess)
-        elif(message.id_sender == contact.message_id):
+        elif(message.uuid_sender == contact.uuid_contact):
             mess = {}
             mess["sender"] = "contact"
             try:

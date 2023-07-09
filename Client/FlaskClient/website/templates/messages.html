@@ -3,7 +3,7 @@
 {% block title %}Message Sender{% endblock %}
 
 {% block content%}
-<h2>Messages with : {{contact.name}} (id = {{contact.message_id}})</h2>
+<h2>Messages with : {{contact.name}} (id = {{contact.uuid_contact}})</h2>
 <form method="POST" class="col s12">
     <button type="submit"
         name="load"
