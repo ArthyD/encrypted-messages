@@ -5,23 +5,23 @@ from werkzeug.security import check_password_hash
 
 
 class MessageSender:
-    def __init__(self,id,cryptor, user_provided_token, server_provided_token, hash_server_token):
+    def __init__(self,uuid,cryptor, user_provided_token, server_provided_token, hash_server_token):
         self.cryptor = cryptor
-        self.id = id
+        self.uuid = uuid
         self.user_provided_token = user_provided_token
         self.sever_provided_token = server_provided_token
         self.hash_server_token = hash_server_token
         self.url = os.getenv('SERVER_URL')
 
-    def send_message(self, id_receiver,message):
+    def send_message(self, uuid_receiver,message):
         try:
-            user_info = requests.get(self.url+f'/get_user_key/{id_receiver}')
+            user_info = requests.get(self.url+f'/get_user_key/{uuid_receiver}')
             user_info=json.loads(user_info.text)
             self.cryptor.set_other_pub_key(user_info["pub_key"].encode())
             ciphertext = self.cryptor.encrypt_message(message)
             data = {}
-            data["sender_id"]=self.id
-            data["receiver_id"]=id_receiver
+            data["sender_uuid"]=self.uuid
+            data["receiver_uuid"]=uuid_receiver
             data["message"]=ciphertext.decode()
             data["server_provided_token"] = self.sever_provided_token
             data["user_provided_token"] = self.user_provided_token
@@ -39,15 +39,15 @@ class MessageSender:
         except:
             print("Could not send message")
 
-    def send_signature(self, id_receiver,message):
+    def send_signature(self, uuid_receiver,message):
         try:
-            user_info = requests.get(self.url+f'/get_user_key/{id_receiver}')
+            user_info = requests.get(self.url+f'/get_user_key/{uuid_receiver}')
             user_info=json.loads(user_info.text)
             self.cryptor.set_other_pub_key(user_info["pub_key"].encode())
             ciphertext = self.cryptor.sign_message(message)
             data = {}
-            data["sender_id"]=self.id
-            data["receiver_id"]=id_receiver
+            data["sender_uuid"]=self.uuid
+            data["receiver_uuid"]=uuid_receiver
             data["message"]=ciphertext.decode()
             data["server_provided_token"] = self.sever_provided_token
             data["user_provided_token"] = self.user_provided_token
@@ -65,9 +65,9 @@ class MessageSender:
             print("Could not send message")
 
 class MessageReceiver:
-    def __init__(self,id,cryptor, user_provided_token, server_provided_token, hash_server_token):
+    def __init__(self,uuid,cryptor, user_provided_token, server_provided_token, hash_server_token):
         self.cryptor = cryptor
-        self.id = id
+        self.uuid = uuid
         self.user_provided_token = user_provided_token
         self.sever_provided_token = server_provided_token
         self.hash_server_token = hash_server_token
@@ -77,7 +77,7 @@ class MessageReceiver:
         message_received = []
         try:
             data = {}
-            data["id"]= self.id
+            data["uuid"]= self.uuid
             data["server_provided_token"] = self.sever_provided_token
             data["user_provided_token"] = self.user_provided_token
             data = json.dumps(data)

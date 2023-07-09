@@ -23,10 +23,10 @@ class Test_sender:
         data = json.dumps(data)
         response = requests.post(self.url+f'/create_account',data = data)
         response = json.loads(response.text)
-        self.id = response["id"]
+        self.uuid = response["uuid"]
         self.server_provided_token = response["server_provided_token"]
         self.hash_server_token = generate_password_hash(response["server_token"],"scrypt")
-        self.sender = MessageSender(self.id,self.cryptor, self.user_provided_token, self.server_provided_token, self.hash_server_token)
+        self.sender = MessageSender(self.uuid,self.cryptor, self.user_provided_token, self.server_provided_token, self.hash_server_token)
 
     def test1(self):
         print(f'[Tester] Test 1/{number_test} : Send a message')
@@ -41,8 +41,8 @@ class Test_sender:
             data = json.dumps(data)
             response = requests.post(self.url+f'/create_account',data = data)
             response = json.loads(response.text)
-            self.id_receiver = response["id"]
-            response = self.sender.send_message(self.id_receiver,message)
+            self.uuid_receiver = response["uuid"]
+            response = self.sender.send_message(self.uuid_receiver,message)
             self.id_message = response["id"]
             print("[*] Test 1 ok")
         except:
@@ -66,7 +66,7 @@ class Test_sender:
         print(f'[Tester] Test 3/{number_test} : Send a signature')
         try:
             message = b'Signature'
-            response = self.sender.send_signature(self.id_receiver,message)
+            response = self.sender.send_signature(self.uuid_receiver,message)
             self.id_message = response["id"]
             print("[*] Test 3 ok")
         except:

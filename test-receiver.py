@@ -20,10 +20,10 @@ class TestReceiver:
         data = json.dumps(data)
         response = requests.post(self.url+f'/create_account',data = data)
         response = json.loads(response.text)
-        self.id_receiver = response["id"]
+        self.uuid_receiver = response["uuid"]
         self.server_provided_token = response["server_provided_token"]
         self.hash_server_token = generate_password_hash(response["server_token"],"scrypt")
-        self.receiver = MessageReceiver(self.id_receiver,self.cryptor, self.user_provided_token, self.server_provided_token, self.hash_server_token)
+        self.receiver = MessageReceiver(self.uuid_receiver,self.cryptor, self.user_provided_token, self.server_provided_token, self.hash_server_token)
         
         self.cryptor2 = Cryptor('','','','password')
         self.cryptor2.generate_keys()
@@ -35,14 +35,14 @@ class TestReceiver:
         data = json.dumps(data)
         response = requests.post(self.url+f'/create_account',data = data)
         response = json.loads(response.text)
-        self.id_sender = response["id"]
+        self.uuid_sender = response["uuid"]
         self.server_provided_token2 = response["server_provided_token"]
         self.hash_server_token2 = generate_password_hash(response["server_token"],"scrypt")
-        self.sender = MessageSender(self.id_sender,self.cryptor, self.user_provided_token2, self.server_provided_token2, self.hash_server_token2)
+        self.sender = MessageSender(self.uuid_sender,self.cryptor, self.user_provided_token2, self.server_provided_token2, self.hash_server_token2)
 
-        self.sender.send_message(self.id_receiver,b'Test1')
-        self.sender.send_message(self.id_receiver,b'Test2')
-        self.sender.send_message(self.id_receiver,b'Test3')
+        self.sender.send_message(self.uuid_receiver,b'Test1')
+        self.sender.send_message(self.uuid_receiver,b'Test2')
+        self.sender.send_message(self.uuid_receiver,b'Test3')
 
     def test1(self):
         print(f'[Tester] Test 1/{number_test} : Receive messages')
